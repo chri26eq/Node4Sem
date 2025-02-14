@@ -1,15 +1,31 @@
 const express = require("express");
 const app = express();
+
+const PORT = 8080;
+
 app.use(express.json()); // tillader Express at parse json i request bodyen
 
 //------------Endpoints------------
 
 app.get("/fingerbones", (requ, resp) => {
-  resp.send({ data: fingerBones });
+  if (fingerBones.length === 0) {
+    resp.status(204).send({ data: fingerBones });
+  } else {
+    resp.send({ data: fingerBones });
+  }
 });
 
 app.get("/fingerbones/:id", (requ, resp) => {
-  resp.send({ data: findFingerboneById(requ.params.id) });
+  const fingerBoneId = +requ.params.id;
+  const foundFingerBone = findFingerboneById(fingerBoneId);
+
+  if (!foundFingerBone) {
+    resp
+      .status(404)
+      .send({ error: `No Fingerbone found with id ${fingerBoneId}` });
+  } else {
+    resp.send({ data: foundFingerBone });
+  }
 });
 
 app.post("/fingerbones", (requ, resp) => {
@@ -24,6 +40,8 @@ app.put("/fingerbones/:id", (requ, resp) => {
   overwriteFingerBoneById(id, newFingerBone);
   resp.send({ data: findFingerboneById(newFingerBone.id) });
 });
+
+//app.patch()
 
 app.delete("/fingerbones/:id", (req, res) => {
   const id = +req.params.id;
@@ -45,7 +63,7 @@ app.delete("/fingerbones/:id", (req, res) => {
 //------------Hjælpefunktioner------------
 
 function findFingerboneById(id) {
-  return fingerBones.find((bone) => bone.id == id);
+  return fingerBones.find((bone) => bone.id === id);
 }
 
 function overwriteFingerBoneById(id, fingerBoneObj) {
@@ -102,4 +120,4 @@ const fingerBones = [
 
 //------------Port listener------------
 
-app.listen(8080);
+app.listen(PORT);
