@@ -5,72 +5,6 @@ const PORT = 8080;
 
 app.use(express.json()); // tillader Express at parse json i request bodyen
 
-//------------Endpoints------------
-
-app.get("/fingerbones", (requ, resp) => {
-  if (fingerBones.length === 0) {
-    resp.status(204).send({ data: fingerBones });
-  } else {
-    resp.send({ data: fingerBones });
-  }
-});
-
-app.get("/fingerbones/:id", (requ, resp) => {
-  const fingerBoneId = +requ.params.id;
-  const foundFingerBone = findFingerboneById(fingerBoneId);
-
-  if (!foundFingerBone) {
-    resp
-      .status(404)
-      .send({ error: `No Fingerbone found with id ${fingerBoneId}` });
-  } else {
-    resp.send({ data: foundFingerBone });
-  }
-});
-
-app.post("/fingerbones", (requ, resp) => {
-  fingerBones.push(requ.body.data);
-  resp.send({ data: fingerBones[fingerBones.length - 1] });
-});
-
-app.put("/fingerbones/:id", (requ, resp) => {
-  const id = +requ.params.id;
-  const newFingerBone = requ.body.data;
-
-  overwriteFingerBoneById(id, newFingerBone);
-  resp.send({ data: findFingerboneById(newFingerBone.id) });
-});
-
-//app.patch()
-
-app.delete("/fingerbones/:id", (req, res) => {
-  const id = +req.params.id;
-  const index = fingerBones.findIndex((bone) => bone.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ error: "Fingerbone not found!" });
-  }
-
-  const deletedBone = fingerBones.splice(index, 1);
-  res.json({
-    data: {
-      message: "Fingerbone deleted!",
-      deletedBone: deletedBone,
-    },
-  });
-});
-
-//------------Hjælpefunktioner------------
-
-function findFingerboneById(id) {
-  return fingerBones.find((bone) => bone.id === id);
-}
-
-function overwriteFingerBoneById(id, fingerBoneObj) {
-  let fingerBoneIndex = fingerBones.findIndex((bone) => bone.id == id);
-  fingerBones[fingerBoneIndex] = fingerBoneObj;
-}
-
 //------------Constants------------
 
 const fingerBones = [
@@ -118,6 +52,98 @@ const fingerBones = [
   },
 ];
 
+let nextId = 6;
+
+//------------Endpoints------------
+
+app.get("/fingerbones", (requ, resp) => {
+  if (fingerBones.length === 0) {
+    resp.status(204).send({ data: fingerBones });
+  } else {
+    resp.send({ data: fingerBones });
+  }
+});
+
+app.get("/fingerbones/:id", (requ, resp) => {
+  const fingerBoneId = +requ.params.id;
+  const foundFingerBone = findFingerboneById(fingerBoneId);
+
+  if (!foundFingerBone) {
+    resp
+      .status(404)
+      .send({ error: `No Fingerbone found with id ${fingerBoneId}` });
+  } else {
+    resp.send({ data: foundFingerBone });
+  }
+});
+
+app.post("/fingerbones", (requ, resp) => {
+  const newFingerBone = requ.body;
+  newFingerBone.id = nextId++;
+  fingerBones.push(newFingerBone);
+
+  resp.send({ data: fingerBones[fingerBones.length - 1] });
+});
+
+app.put("/fingerbones/:id", (requ, resp) => {
+  const id = +requ.params.id;
+  const newFingerBone = requ.body;
+
+  overwriteFingerBoneById(id, newFingerBone);
+  resp.send({ data: findFingerboneById(newFingerBone.id) });
+});
+
+app.patch("/fingerbones/:id", (requ, resp) => {
+  const id = +requ.params.id;
+  const foundFingerBoneIndex = fingerBones.findIndex((bone) => bone.id === id);
+  
+  if (foundFingerBoneIndex === -1) {
+    resp.status(404).send({ error: "Fingerbone not found!" });
+  } else {
+    const existingFingerBone = fingerBones[id];
+
+    const newFingerBone = {...existingFingerBone, ...requ.body, id: existingFingerBone.id}
+
+    fingerBones[foundFingerBoneIndex] = newFingerBone;
+
+    resp.send({data: {newFingerBone}})
+  }
+});
+
+app.delete("/fingerbones/:id", (requ, resp) => {
+  const id = +requ.params.id;
+  const foundFingerBoneIndex = fingerBones.findIndex((bone) => bone.id === id);
+
+  if (foundFingerBoneIndex === -1) {
+    resp.status(404).send({ error: "Fingerbone not found!" });
+  } else {
+    const deletedBone = fingerBones.splice(foundFingerBoneIndex, 1);
+    resp.send({
+      data: {
+        message: "Fingerbone deleted!",
+        deletedBone: deletedBone,
+      },
+    });
+  }
+});
+
+//------------Hjælpefunktioner------------
+
+function findFingerboneById(id) {
+  return fingerBones.find((bone) => bone.id === id);
+}
+
+function overwriteFingerBoneById(id, fingerBoneObj) {
+  let fingerBoneIndex = fingerBones.findIndex((bone) => bone.id == id);
+  fingerBones[fingerBoneIndex] = fingerBoneObj;
+}
+
 //------------Port listener------------
 
-app.listen(PORT);
+app.listen(PORT, (error) => {
+  if (error) {
+    console.log("Error starting the server", error);
+    return;
+  }
+  console.log("Server is running on port", PORT);
+});
