@@ -90,7 +90,7 @@ app.put("/fingerbones/:id", (requ, resp) => {
   const newFingerBone = requ.body;
 
   overwriteFingerBoneById(id, newFingerBone);
-  resp.send({ data: findFingerboneById(newFingerBone.id) });
+  resp.send({ data: newFingerBone });
 });
 
 app.patch("/fingerbones/:id", (requ, resp) => {
@@ -133,9 +133,9 @@ function findFingerboneById(id) {
   return fingerBones.find((bone) => bone.id === id);
 }
 
-function overwriteFingerBoneById(id, fingerBoneObj) {
+function overwriteFingerBoneById(id, newFingerBoneObj) {
   let fingerBoneIndex = fingerBones.findIndex((bone) => bone.id == id);
-  fingerBones[fingerBoneIndex] = fingerBoneObj;
+  fingerBones[fingerBoneIndex] = {...newFingerBoneObj, id};
 }
 
 //------------Port listener------------
