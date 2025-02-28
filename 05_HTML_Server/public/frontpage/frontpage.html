@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- 3. CSS -->
+    <link rel="stylesheet" href="/frontpage/frontpage.css" />      
+
+    <!-- 2. CSS in style tag -->
+    <style>
+      #frontpage-header {
+        color: red;
+      }
+
+      .headers {
+        background-color: grey;
+      }
+    </style>
+    
+    <title>Frontpage</title>
+  </head>
+  <body>
+    <h1 id="frontpage-header" class="headers">Frontpage</h1>
+
+    <!-- 1. inline CSS-->
+    <h2 class="headers" style="color: green">Welcome users!</h2>
+
+    <div id="visitorsCount"></div>
+
+
+    <script src="./frontpage.js"></script>
+    <script>
+      fetch("/visitorscounts")
+        .then((resp) => resp.json())
+        .then((result) => {
+          const visitorsCountDiv = document.getElementById("visitorsCount");
+          visitorsCountDiv.textContent = result.data;
+        });
+    </script>
+  </body>
+</html>
