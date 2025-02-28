@@ -1,1 +1,3 @@
-console.log("does it work");
+import partyFactory from "./partyFactory.js"
+
+console.log(partyFactory);

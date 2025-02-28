@@ -21,3 +21,5 @@ function partyFactory(partyName) {
     
   };
 }
+
+export default partyFactory;
